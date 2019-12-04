@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Asynchronous Requests · Dynamic JAMstack Examples</title>
+    <link rel="stylesheet" href="../common/global.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <span class="logo">Dynamic JAMstack Examples</span>
+      <nav>
+        <a href="/01-async-request/">Async Requests</a>
+        <a href="/02-offload-intense-work/">Offload Intense Work</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Search for a Rick & Morty Character!</h1>
+
+      <form id="search-form">
+        <label for="name">Find characters by name</label>
+        <input type="text" id="name" name="name" required />
+        <button type="submit">Search</button>
+      </form>
+
+      <ul id="search-results"></ul>
+
+      <template id="search-result-template">
+        <li class="search-result">
+          <figure class="image-wrapper">
+            <img class="image" />
+          </figure>
+
+          <h2 class="name"></h2>
+          <dl class="details">
+            <dt>Species</dt>
+            <dd class="species"></dd>
+            <dt>Status</dt>
+            <dd class="status"></dd>
+          </dl>
+        </li>
+      </template>
+
+      <script type="module">
+        if (!'content' in document.createElement('template')) {
+          console.error('your browser does not support the template element');
+        }
+
+        const searchResults = document.getElementById('search-results');
+        const template = document.getElementById('search-result-template');
+        const form = document.getElementById('search-form');
+
+        const createResultRow = character => {
+          const result = document.importNode(template.content, true);
+
+          result.querySelector('.name').textContent = character.name;
+          result.querySelector('.species').textContent = character.species;
+          result.querySelector('.status').textContent = character.status;
+
+          const img = result.querySelector('.image');
+          img.src = character.image;
+          img.alt = character.name;
+
+          searchResults.appendChild(result);
+        };
+
+        const handleSubmit = async event => {
+          event.preventDefault();
+
+          // remove any existing search results
+          while (searchResults.firstChild) {
+            searchResults.removeChild(searchResults.firstChild);
+          }
+
+          const name = form.elements['name'].value;
+          const characters = await fetch(
+            `https://rickandmortyapi.com/api/character/?name=${name}`,
+          )
+            .then(response => response.json())
+            .catch(error => console.error(error));
+
+          characters.results.map(createResultRow);
+        };
+
+        form.addEventListener('submit', handleSubmit);
+      </script>
+    </main>
+  </body>
+</html>

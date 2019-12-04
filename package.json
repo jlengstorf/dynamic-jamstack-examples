@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "dynamic-jamstack-examples",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Jason Lengstorf <jason@lengstorf.com> (https://lengstorf.com)",
+  "license": "MIT",
+  "engines": {
+    "node": "^12.8.0"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "serve": "^11.2.0",
+    "sharp": "^0.23.3"
+  },
+  "scripts": {
+    "start": "serve examples"
+  }
+}

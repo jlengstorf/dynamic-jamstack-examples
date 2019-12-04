@@ -1,0 +1,18 @@
+.conversion-result {
+  display: flex;
+  justify-content: center;
+}
+
+figure {
+  margin: 0 1rem;
+  border: 1px solid hsl(280, 85%, 90%);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  max-width: 220px;
+}
+
+figure img {
+  width: 100%;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Offload Intense Work · Dynamic JAMstack Examples</title>
+    <link rel="stylesheet" href="../common/global.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <span class="logo">Dynamic JAMstack Examples</span>
+      <nav>
+        <a href="/01-async-request/">Async Requests</a>
+        <a href="/02-offload-intense-work/">Offload Intense Work</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Convert Image to Grayscale from URL</h1>
+      <form
+        id="image-form"
+        action="/.netlify/functions/convert-image"
+        method="POST"
+      >
+        <label for="passphrase">URL of an image to convert</label>
+        <input type="url" name="imageURL" required />
+        <button type="submit">Convert</button>
+      </form>
+
+      <div id="converted"></div>
+    </main>
+
+    <template id="conversion-template">
+      <div class="conversion-result">
+        <figure>
+          <img class="original" alt="original image" />
+          <figcaption>original</figcaption>
+        </figure>
+        <figure>
+          <img class="converted" alt="image converted to greyscale" />
+          <figcaption>converted</figcaption>
+        </figure>
+      </div>
+    </template>
+
+    <script type="module">
+      import handleSubmit from './handle-submit.js';
+
+      const form = document.getElementById('image-form');
+      form.addEventListener('submit', handleSubmit);
+    </script>
+  </body>
+</html>
