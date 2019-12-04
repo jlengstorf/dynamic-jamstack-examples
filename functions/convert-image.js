@@ -1,101 +1,73 @@
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
+const tmp = require('tmp');
+const jimp = require('jimp');
 const axios = require('axios');
 
-const uploadToGitHub = (imagePath, callback) => {
+const uploadToGitHub = (imagePath, tmpDir) => {
   const GITHUB_API = 'https://api.github.com';
   const username = 'jlengstorf';
   const repo = 'dynamic-jamstack-examples';
   const dir = 'examples/02-offload-intense-work/images';
 
   // get the image data as a base64-encoded string so we can send via HTTP PUT
-  const imageData = fs.readFileSync(imagePath);
+  const imageData = fs.readFileSync(path.join(tmpDir, imagePath));
   const imageContent = Buffer.from(imageData).toString('base64');
 
   // upload the converted image to our GitHub repo
   // see https://developer.github.com/v3/repos/contents/#create-or-update-a-file
-  axios
-    .put(
-      `${GITHUB_API}/repos/${username}/${repo}/contents/${dir}/${imagePath}`,
-      {
-        message: `feat: upload ${imagePath}`,
-        content: imageContent,
+  return axios.put(
+    `${GITHUB_API}/repos/${username}/${repo}/contents/${dir}/${imagePath}`,
+    {
+      message: `feat: upload ${imagePath}`,
+      content: imageContent,
+    },
+    {
+      headers: {
+        // get a token at https://github.com/settings/tokens
+        // make sure it has the `public_repo` scope
+        // set this as an env var for your site at https://app.netlify.com
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
-      {
-        headers: {
-          // get a token at https://github.com/settings/tokens
-          // make sure it has the `public_repo` scope
-          // set this as an env var for your site at https://app.netlify.com
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
-        },
-      },
-    )
-    .then(response => {
-      callback(null, {
-        statusCode: 200,
-        body: JSON.stringify({
-          url: response.data.content.download_url,
-        }),
-      });
-    })
-    .catch(error => {
-      callback({
-        statusCode: 500,
-        body: JSON.stringify('unable to upload image to GitHub'),
-      });
-    });
+    },
+  );
 };
 
-const convertToGrayscale = (inputPath, callback) => {
-  // create a unique filename for the converted image
-  const { name, ext } = path.parse(inputPath);
-  const targetPath = `${name}-bw-${Date.now()}${ext}`;
+exports.handler = async event => {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 404, body: '404 Not Found' };
+  }
+  try {
+    // get the image URL from the POST submission
+    const { imageURL } = JSON.parse(event.body);
 
-  // convert the image to greyscale using Sharp
-  // see https://sharp.pixelplumbing.com/en/v0.17.1/api-constructor/
-  // see https://sharp.pixelplumbing.com/en/v0.17.1/api-colour/#tocolorspace
-  sharp(inputPath)
-    .toColorspace('b-w')
-    .toFile(targetPath, err => {
-      if (err) {
-        callback({
-          statusCode: 500,
-          body: JSON.stringify('unable to convert image to greyscale'),
-        });
-        return;
-      }
+    // use a temporary directory to avoid intermediate file cruft
+    const tmpDir = tmp.dirSync();
 
-      // once the file is converted, upload it to GitHub
-      uploadToGitHub(targetPath, callback);
-    });
-};
+    // create a unique filename for the converted image
+    const { name, ext } = path.parse(imageURL);
+    const targetPath = `${name}-bw-${Date.now()}${ext}`;
 
-exports.handler = (event, _context, callback) => {
-  const { imageURL } = JSON.parse(event.body);
-  const imagePath = path.basename(imageURL);
-  const file = fs.createWriteStream(imagePath);
+    // load the image from URL
+    // see https://www.npmjs.com/package/jimp
+    const image = await jimp.read(imageURL);
 
-  https.get(imageURL, response => {
-    // store the image data from the URL in the newly created file
-    response.pipe(file);
+    // convert the image to greyscale and save to the new filename
+    await image.greyscale().writeAsync(path.join(tmpDir.name, targetPath));
 
-    file
-      .on('finish', () => {
-        // once the file is downloaded, close it and convert it to B&W
-        file.close(() => {
-          convertToGrayscale(imagePath, callback);
-        });
-      })
-      .on('error', () => {
-        // if something goes wrong, delete the file and send back an error
-        fs.unlink(imagePath);
+    // upload the processed image to GitHub
+    const response = await uploadToGitHub(targetPath, tmpDir.name);
 
-        callback({
-          statusCode: 500,
-          body: JSON.stringify('unable to download image'),
-        });
-      });
-  });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        url: response.data.content.download_url,
+      }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(error.message),
+    };
+  }
 };

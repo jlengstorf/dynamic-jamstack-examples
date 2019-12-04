@@ -16,3 +16,8 @@ figure {
 figure img {
   width: 100%;
 }
+
+p {
+  padding: 2rem;
+  text-align: center;
+}
