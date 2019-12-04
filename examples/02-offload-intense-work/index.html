@@ -10,7 +10,7 @@
   </head>
   <body>
     <header>
-      <span class="logo">Dynamic JAMstack Examples</span>
+      <a href="/" class="logo">Dynamic JAMstack Examples</a>
       <nav>
         <a href="/01-async-request/">Async Requests</a>
         <a href="/02-offload-intense-work/">Offload Intense Work</a>
@@ -32,6 +32,18 @@
       <div id="converted"></div>
     </main>
 
+    <footer>
+      Built by <a href="https://lengstorf.com">Jason Lengstorf</a> ·
+      <a href="https://github.com/jlengstorf/dynamic-jamstack-examples"
+        >source code</a
+      >
+      ·
+      <a
+        href="https://netlify.com/?utm_source=dynamic-jamstack-demo-jl&utm_medium=smashingmag&utm_campaign=devex"
+        >Hosted on Netlify</a
+      >
+    </footer>
+
     <template id="conversion-template">
       <div class="conversion-result">
         <figure>
@@ -46,10 +58,28 @@
     </template>
 
     <script type="module">
-      import handleSubmit from './handle-submit.js';
+      import showResults from './show-results.js';
 
       const form = document.getElementById('image-form');
-      form.addEventListener('submit', handleSubmit);
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        // get the image URL from the form
+        const elements = event.target.elements;
+        const imageURL = elements['imageURL'].value;
+
+        // send the image off for processing
+        const promise = fetch('/.netlify/functions/convert-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageURL }),
+        })
+          .then(result => result.json())
+          .catch(error => console.error(error));
+
+        // do the work to show the result on the page
+        showResults(imageURL, promise);
+      });
     </script>
   </body>
 </html>

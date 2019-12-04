@@ -5,28 +5,13 @@ const emptyContainer = container => {
   }
 };
 
-export default async event => {
-  event.preventDefault();
-
+export default async (originalImageURL, conversionPromise) => {
   // get the display DOM element and make sure it’s empty
   const convertedDisplay = document.getElementById('converted');
   emptyContainer(convertedDisplay);
 
   // add a loading state
   convertedDisplay.innerHTML = '<p>processing...</p>';
-
-  // get the image URL from the form
-  const elements = event.target.elements;
-  const imageURL = elements['imageURL'].value;
-
-  // send the image off for processing
-  const result = await fetch('/.netlify/functions/convert-image', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageURL }),
-  })
-    .then(result => result.json())
-    .catch(error => console.error(error));
 
   // grab the template for showing images
   const template = document.getElementById('conversion-template');
@@ -37,11 +22,13 @@ export default async event => {
     new Promise(resolve => {
       const originalImage = converted.querySelector('.original');
       originalImage.addEventListener('load', () => resolve());
-      originalImage.src = imageURL;
+      originalImage.src = originalImageURL;
     }),
-    new Promise(resolve => {
+    new Promise(async resolve => {
       const convertedImage = converted.querySelector('.converted');
       convertedImage.addEventListener('load', () => resolve());
+
+      const result = await Promise.resolve(conversionPromise);
       convertedImage.src = result.url;
     }),
   ]);
