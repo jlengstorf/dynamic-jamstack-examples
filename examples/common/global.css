@@ -29,6 +29,7 @@ header {
 
 header .logo {
   font-weight: 700;
+  text-decoration: none;
 }
 
 header nav {
@@ -49,6 +50,12 @@ h1 {
   color: hsl(280, 15%, 15%);
   font-size: 1.5rem;
   text-align: center;
+}
+
+h2 {
+  color: hsl(280, 15%, 15%);
+  font-size: 1.25rem;
+  margin-top: 2rem;
 }
 
 form {
@@ -92,4 +99,14 @@ button {
   grid-area: button;
   margin: 0;
   text-transform: uppercase;
+}
+
+footer {
+  border-top: 1px solid hsl(280, 85%, 90%);
+  font-size: 0.75rem;
+  margin: 2rem auto 2rem;
+  max-width: 90vw;
+  padding-top: 1rem;
+  text-align: center;
+  width: 600px;
 }
