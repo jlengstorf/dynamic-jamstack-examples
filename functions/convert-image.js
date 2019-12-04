@@ -42,6 +42,7 @@ exports.handler = async event => {
     const { imageURL } = JSON.parse(event.body);
 
     // use a temporary directory to avoid intermediate file cruft
+    // see https://www.npmjs.com/package/tmp
     const tmpDir = tmp.dirSync();
 
     // create a unique filename for the converted image
