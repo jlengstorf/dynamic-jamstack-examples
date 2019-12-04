@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Store Data · Dynamic JAMstack Examples</title>
+    <link rel="stylesheet" href="./common/global.css" />
+  </head>
+  <body>
+    <header>
+      <a href="/" class="logo">Dynamic JAMstack Examples</a>
+      <nav>
+        <a href="/01-async-request/">Async Requests</a>
+        <a href="/02-offload-intense-work/">Offload Intense Work</a>
+        <a href="/03-store-data/">Store Data</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Help Fight the Tyranny of Pants!</h1>
+      <p>
+        We need your help to get pajama pants added to the official office dress
+        code! Add your name below to let Big Pants™ know that the workers of the
+        world demand #MaximumComf!
+      </p>
+      <form action="/.netlify/functions/add-signature" method="POST">
+        <label for="signature">Your name</label>
+        <input type="text" name="signature" required />
+        <button type="submit">Sign</button>
+      </form>
+
+      <ul class="signatures"></ul>
+    </main>
+
+    <footer>
+      Built by <a href="https://lengstorf.com">Jason Lengstorf</a> ·
+      <a href="https://github.com/jlengstorf/dynamic-jamstack-examples"
+        >source code</a
+      >
+      ·
+      <a
+        href="https://netlify.com/?utm_source=dynamic-jamstack-demo-jl&utm_medium=smashingmag&utm_campaign=devex"
+        >Hosted on Netlify</a
+      >
+    </footer>
+
+    <script>
+      fetch('/.netlify/functions/get-signatures')
+        .then(res => res.json())
+        .then(names => {
+          const signatures = document.querySelector('.signatures');
+
+          names.forEach(({ name }) => {
+            const li = document.createElement('li');
+            li.innerText = name;
+            signatures.appendChild(li);
+          });
+        });
+    </script>
+  </body>
+</html>
