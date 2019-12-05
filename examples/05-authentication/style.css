@@ -1,0 +1,22 @@
+.content {
+  text-align: center;
+}
+
+button {
+  margin-top: 0.75rem;
+}
+
+.logged-out {
+  display: block;
+}
+
+.logged-in {
+  display: none;
+}
+.authenticated .logged-out {
+  display: none;
+}
+
+.authenticated .logged-in {
+  display: block;
+}

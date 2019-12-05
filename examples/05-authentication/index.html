@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Authentication · Dynamic JAMstack Examples</title>
+    <link rel="stylesheet" href="../common/global.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <a href="/" class="logo">Dynamic JAMstack Examples</a>
+      <nav>
+        <a href="/01-async-request/">Async Requests</a>
+        <a href="/02-offload-intense-work/">Offload Intense Work</a>
+        <a href="/03-store-data/">Store Data</a>
+        <a href="/04-client-side-graphql/">Client-Side GraphQL</a>
+        <a href="/05-authentication/">Authentication</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="content logged-out">
+        <h1>Super Secret Stuff!</h1>
+        <p>🔐 only my bestest friends can see this content</p>
+        <button class="login">log in / sign up as my best friend</button>
+      </div>
+      <div class="content logged-in">
+        <!-- quit peekin’ you hackers! -->
+        <div class="secret-stuff"></div>
+        <button class="logout">log out</button>
+      </div>
+    </main>
+
+    <footer>
+      Built by <a href="https://lengstorf.com">Jason Lengstorf</a> ·
+      <a href="https://github.com/jlengstorf/dynamic-jamstack-examples"
+        >source code</a
+      >
+      ·
+      <a
+        href="https://netlify.com/?utm_source=dynamic-jamstack-demo-jl&utm_medium=smashingmag&utm_campaign=devex"
+        >Hosted on Netlify</a
+      >
+    </footer>
+
+    <script
+      type="text/javascript"
+      src="https://identity.netlify.com/v1/netlify-identity-widget.js"
+    ></script>
+    <script>
+      const login = document.querySelector('.login');
+      login.addEventListener('click', () => {
+        netlifyIdentity.open();
+      });
+
+      const logout = document.querySelector('.logout');
+      logout.addEventListener('click', () => {
+        netlifyIdentity.logout();
+      });
+
+      netlifyIdentity.on('login', async () => {
+        document.querySelector('body').classList.add('authenticated');
+
+        const token = await netlifyIdentity.currentUser().jwt();
+
+        const response = await fetch('/.netlify/functions/get-secret-content', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.text());
+
+        document.querySelector('.secret-stuff').innerHTML = response;
+      });
+
+      netlifyIdentity.on('logout', () => {
+        document.querySelector('body').classList.remove('authenticated');
+      });
+    </script>
+  </body>
+</html>
