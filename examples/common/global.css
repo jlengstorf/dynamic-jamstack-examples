@@ -81,7 +81,8 @@ label {
   text-transform: uppercase;
 }
 
-input {
+input,
+select {
   border: 1px solid hsl(280, 85%, 90%);
   border-radius: 0.25rem;
   font-size: 1rem;

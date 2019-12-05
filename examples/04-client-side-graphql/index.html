@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Client-Side GraphQL · Dynamic JAMstack Examples</title>
+    <link rel="stylesheet" href="../common/global.css" />
+  </head>
+  <body>
+    <header>
+      <a href="/" class="logo">Dynamic JAMstack Examples</a>
+      <nav>
+        <a href="/01-async-request/">Async Requests</a>
+        <a href="/02-offload-intense-work/">Offload Intense Work</a>
+        <a href="/03-store-data/">Store Data</a>
+        <a href="/04-client-side-graphql/">Client-Side GraphQL</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Star Wars Movies</h1>
+      <form action="/.netlify/functions/add-signature" method="POST">
+        <label for="movie">Choose a Star Wars Movie</label>
+        <select name="movie" id="movie">
+          <option value="">--please choose a movie--</option>
+        </select>
+        <button type="submit">Details</button>
+      </form>
+
+      <div class="movie-info"></div>
+    </main>
+
+    <footer>
+      Built by <a href="https://lengstorf.com">Jason Lengstorf</a> ·
+      <a href="https://github.com/jlengstorf/dynamic-jamstack-examples"
+        >source code</a
+      >
+      ·
+      <a
+        href="https://netlify.com/?utm_source=dynamic-jamstack-demo-jl&utm_medium=smashingmag&utm_campaign=devex"
+        >Hosted on Netlify</a
+      >
+    </footer>
+
+    <script type="module">
+      import gql from 'https://dev.jspm.io/graphql-tag';
+      import client from './client.js';
+
+      client
+        .query({
+          query: gql`
+            query {
+              allFilms {
+                edges {
+                  node {
+                    id
+                    title
+                  }
+                }
+              }
+            }
+          `,
+        })
+        .then(response => {
+          const select = document.querySelector('select[name="movie"]');
+          const films = response.data.allFilms.edges.map(({ node }) => node);
+
+          films.forEach(film => {
+            const option = document.createElement('option');
+            option.value = film.id;
+            option.innerText = film.title;
+
+            select.appendChild(option);
+          });
+
+          select.addEventListener('change', event => {
+            const movieID = event.target.value;
+            const info = document.querySelector('.movie-info');
+
+            if (!movieID) {
+              info.innerHTML = '';
+              return;
+            }
+
+            client
+              .query({
+                query: gql`
+                  query($id: ID!) {
+                    film(id: $id) {
+                      title
+                      releaseDate
+                      director
+                      episodeID
+                    }
+                  }
+                `,
+                variables: { id: movieID },
+              })
+              .then(res => {
+                const film = res.data.film;
+
+                info.innerHTML = `
+                  <h2>${film.title} (Episode ${film.episodeID})</h2>
+                  <ul>
+                    <li>Release Date: ${film.releaseDate}</li>
+                    <li>Director: ${film.director}</li>
+                  </ul>
+                `;
+              });
+          });
+        })
+        .catch(error => console.error(error));
+    </script>
+  </body>
+</html>
