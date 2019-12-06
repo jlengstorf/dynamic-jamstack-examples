@@ -14,16 +14,14 @@ body {
   color: hsl(280, 10%, 25%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  font-size: 22px;
+  font-size: 18px;
   margin: 0;
 }
 
 header {
   background: hsl(280, 85%, 15%);
   color: hsl(280, 15%, 85%);
-  display: flex;
-  font-size: 0.75rem;
-  justify-content: space-between;
+  font-size: 0.875rem;
   padding: 1rem 5vw;
 }
 
@@ -38,6 +36,9 @@ header nav {
 
 header a {
   color: inherit;
+  display: inline-block;
+  margin: 0;
+  padding: 0.25rem;
 }
 
 main {
@@ -62,13 +63,6 @@ form {
   background: hsl(280, 85%, 95%);
   border: 1px solid hsl(280, 85%, 90%);
   border-radius: 0.5rem;
-  display: grid;
-  grid-column-gap: 1rem;
-  grid-row-gap: 0.125rem;
-  grid-template-areas:
-    'label ......'
-    'input button';
-  grid-template-columns: 1fr 125px;
   padding: 0.5rem;
 }
 
@@ -86,9 +80,9 @@ select {
   border: 1px solid hsl(280, 85%, 90%);
   border-radius: 0.25rem;
   font-size: 1rem;
-  grid-area: input;
   margin: 0;
   padding: 0.125rem;
+  width: 100%;
 }
 
 button {
@@ -97,8 +91,7 @@ button {
   border-radius: 0.25rem;
   color: hsl(280, 15%, 95%);
   font-size: 1rem;
-  grid-area: button;
-  margin: 0;
+  margin: 0.75rem 0 0;
   text-transform: uppercase;
 }
 
@@ -110,4 +103,42 @@ footer {
   padding-top: 1rem;
   text-align: center;
   width: 600px;
+}
+
+@media (min-width: 850px) {
+  body {
+    font-size: 22px;
+  }
+
+  header {
+    font-size: 0.75rem;
+  }
+
+  @supports (display: flex) {
+    header {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  @supports (display: grid) {
+    form {
+      display: grid;
+      grid-column-gap: 1rem;
+      grid-row-gap: 0.125rem;
+      grid-template-areas:
+        'label ......'
+        'input button';
+      grid-template-columns: 1fr 125px;
+    }
+    input,
+    select {
+      grid-area: input;
+    }
+
+    button {
+      grid-area: button;
+      margin-top: 0;
+    }
+  }
 }
