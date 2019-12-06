@@ -6,6 +6,10 @@ const emptyContainer = container => {
 };
 
 export default async (originalImageURL, conversionPromise) => {
+  if (!'content' in document.createElement('template')) {
+    console.error('your browser does not support the template element');
+  }
+
   // get the display DOM element and make sure it’s empty
   const convertedDisplay = document.getElementById('converted');
   emptyContainer(convertedDisplay);
@@ -28,6 +32,8 @@ export default async (originalImageURL, conversionPromise) => {
       const convertedImage = converted.querySelector('.converted');
       convertedImage.addEventListener('load', () => resolve());
 
+      // we don’t want the conversion to block anything else, so we wait to
+      // block anything until we absolutely need the new URL
       const result = await Promise.resolve(conversionPromise);
       convertedImage.src = result.url;
     }),

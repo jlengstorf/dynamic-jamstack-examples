@@ -4,6 +4,21 @@ const tmp = require('tmp');
 const jimp = require('jimp');
 const axios = require('axios');
 
+const convertToGrayscale = async (imageURL, tmpDir) => {
+  // create a unique filename for the converted image
+  const { name, ext } = path.parse(imageURL);
+  const convertedPath = `${name}-bw-${Date.now()}${ext}`;
+
+  // load the image from URL
+  // see https://www.npmjs.com/package/jimp
+  const image = await jimp.read(imageURL);
+
+  // convert the image to greyscale and save to the new filename
+  await image.greyscale().writeAsync(path.join(tmpDir.name, convertedPath));
+
+  return convertedPath;
+};
+
 const uploadToGitHub = (imagePath, tmpDir) => {
   const GITHUB_API = 'https://api.github.com';
   const username = 'jlengstorf';
@@ -34,9 +49,11 @@ const uploadToGitHub = (imagePath, tmpDir) => {
 };
 
 exports.handler = async event => {
+  // only try to handle POST requests
   if (event.httpMethod !== 'POST') {
     return { statusCode: 404, body: '404 Not Found' };
   }
+
   try {
     // get the image URL from the POST submission
     const { imageURL } = JSON.parse(event.body);
@@ -45,19 +62,10 @@ exports.handler = async event => {
     // see https://www.npmjs.com/package/tmp
     const tmpDir = tmp.dirSync();
 
-    // create a unique filename for the converted image
-    const { name, ext } = path.parse(imageURL);
-    const targetPath = `${name}-bw-${Date.now()}${ext}`;
-
-    // load the image from URL
-    // see https://www.npmjs.com/package/jimp
-    const image = await jimp.read(imageURL);
-
-    // convert the image to greyscale and save to the new filename
-    await image.greyscale().writeAsync(path.join(tmpDir.name, targetPath));
+    const convertedPath = await convertToGrayscale(imageURL, tmpDir);
 
     // upload the processed image to GitHub
-    const response = await uploadToGitHub(targetPath, tmpDir.name);
+    const response = await uploadToGitHub(convertedPath, tmpDir.name);
 
     return {
       statusCode: 200,

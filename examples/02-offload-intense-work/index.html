@@ -63,17 +63,12 @@
     <script type="module">
       import showResults from './show-results.js';
 
-      if (!'content' in document.createElement('template')) {
-        console.error('your browser does not support the template element');
-      }
-
-      const form = document.getElementById('image-form');
+      const form = document.querySelector('form');
       form.addEventListener('submit', event => {
         event.preventDefault();
 
         // get the image URL from the form
-        const elements = event.target.elements;
-        const imageURL = elements['imageURL'].value;
+        const imageURL = form.elements['imageURL'].value;
 
         // send the image off for processing
         const promise = fetch('/.netlify/functions/convert-image', {
