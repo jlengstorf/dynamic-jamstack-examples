@@ -23,7 +23,7 @@
     <main>
       <h1>Search for a Rick & Morty Character!</h1>
 
-      <form id="search-form">
+      <form>
         <label for="name">Find characters by name</label>
         <input type="text" id="name" name="name" required />
         <button type="submit">Search</button>
@@ -60,44 +60,25 @@
       </template>
 
       <script type="module">
-        if (!'content' in document.createElement('template')) {
-          console.error('your browser does not support the template element');
-        }
+        import showResults from './show-results.js';
 
-        const searchResults = document.getElementById('search-results');
-        const template = document.getElementById('search-result-template');
-        const form = document.getElementById('search-form');
-
-        const createResultRow = character => {
-          const result = document.importNode(template.content, true);
-
-          result.querySelector('.name').textContent = character.name;
-          result.querySelector('.species').textContent = character.species;
-          result.querySelector('.status').textContent = character.status;
-
-          const img = result.querySelector('.image');
-          img.src = character.image;
-          img.alt = character.name;
-
-          searchResults.appendChild(result);
-        };
+        const form = document.querySelector('form');
 
         const handleSubmit = async event => {
           event.preventDefault();
 
-          // remove any existing search results
-          while (searchResults.firstChild) {
-            searchResults.removeChild(searchResults.firstChild);
-          }
-
+          // get the search term from the form input
           const name = form.elements['name'].value;
+
+          // send a request to the Rick & Morty API based on the user input
           const characters = await fetch(
             `https://rickandmortyapi.com/api/character/?name=${name}`,
           )
             .then(response => response.json())
             .catch(error => console.error(error));
 
-          characters.results.map(createResultRow);
+          // add the search results to the DOM
+          showResults(characters.results);
         };
 
         form.addEventListener('submit', handleSubmit);
