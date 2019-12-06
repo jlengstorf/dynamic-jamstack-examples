@@ -63,6 +63,10 @@
     <script type="module">
       import showResults from './show-results.js';
 
+      if (!'content' in document.createElement('template')) {
+        console.error('your browser does not support the template element');
+      }
+
       const form = document.getElementById('image-form');
       form.addEventListener('submit', event => {
         event.preventDefault();

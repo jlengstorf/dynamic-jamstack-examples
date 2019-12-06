@@ -21,7 +21,7 @@
 
     <main>
       <h1>Star Wars Movies</h1>
-      <form action="/.netlify/functions/add-signature" method="POST">
+      <form>
         <label for="movie">Choose a Star Wars Movie</label>
         <select name="movie" id="movie">
           <option value="">--please choose a movie--</option>
@@ -112,6 +112,11 @@
           });
         })
         .catch(error => console.error(error));
+
+      // disable the form submission; it doesn’t really do anything in this case
+      document.querySelector('form').addEventListener('submit', event => {
+        event.preventDefault();
+      });
     </script>
   </body>
 </html>
