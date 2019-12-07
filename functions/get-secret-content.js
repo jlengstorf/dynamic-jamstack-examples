@@ -1,4 +1,4 @@
-exports.handler = async (event, context) => {
+exports.handler = async (_event, context) => {
   try {
     const { user } = context.clientContext;
 

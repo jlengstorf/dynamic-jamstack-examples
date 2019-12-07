@@ -23,7 +23,7 @@
       <div class="content logged-out">
         <h1>Super Secret Stuff!</h1>
         <p>🔐 only my bestest friends can see this content</p>
-        <button class="login">log in / sign up as my best friend</button>
+        <button class="login">log in / sign up to be my best friend</button>
       </div>
       <div class="content logged-in">
         <!-- quit peekin’ you hackers! -->
@@ -44,10 +44,7 @@
       >
     </footer>
 
-    <script
-      type="text/javascript"
-      src="https://identity.netlify.com/v1/netlify-identity-widget.js"
-    ></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
       const login = document.querySelector('.login');
       login.addEventListener('click', () => {
@@ -57,6 +54,10 @@
       const logout = document.querySelector('.logout');
       logout.addEventListener('click', () => {
         netlifyIdentity.logout();
+      });
+
+      netlifyIdentity.on('logout', () => {
+        document.querySelector('body').classList.remove('authenticated');
       });
 
       netlifyIdentity.on('login', async () => {
@@ -71,10 +72,6 @@
         }).then(res => res.text());
 
         document.querySelector('.secret-stuff').innerHTML = response;
-      });
-
-      netlifyIdentity.on('logout', () => {
-        document.querySelector('body').classList.remove('authenticated');
       });
     </script>
   </body>
